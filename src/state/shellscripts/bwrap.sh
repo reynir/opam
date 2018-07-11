@@ -19,11 +19,14 @@ add_mounts() {
         rw) B="--bind";;
     esac
     for dir in "$@"; do
-        [ -d "$dir" ] && ARGS=("${ARGS[@]}" "$B" "$dir" "$dir")
+        [ -d "$dir" ] && ARGS=("${ARGS[@]}" "$B" "$(realpath "$dir")" "$dir")
     done
 }
 
-add_mounts ro /usr /bin /lib /lib32 /lib64 /etc /opt /nix/store /rw/usrlocal /home
+# NB: /usr/local is added even though it may seem redundant. On Qubes
+# /usr/local is a symlink to /rw/usrlocal. add_mounts will resolve the symlink
+# if needed.
+add_mounts ro /usr /usr/local /bin /lib /lib32 /lib64 /etc /opt /nix/store /home
 
 # C compilers using `ccache` will write to a shared cache directory
 # that remain writeable. ccache seems widespread in some Fedora systems.
